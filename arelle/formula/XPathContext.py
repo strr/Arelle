@@ -937,7 +937,7 @@ class XPathContext:
             "IDREF",
             "ENTITY",
         ):
-            x = v.strip()
+            x = XmlUtil.collapseWhitespace(v)
         elif baseXsdType == "XBRLI_DATEUNION":
             x = dateTime(v, type=DATEUNION)
         elif baseXsdType == "date":

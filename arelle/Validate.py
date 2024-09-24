@@ -508,7 +508,7 @@ class Validate:
                                                                                key=lambda r: (r.fromLabel,r.toLabel))):
                                             modelObject = footnoteRel.toModelObject
                                             if isinstance(modelObject, ModelResource):
-                                                xml = collapseWhitespace(modelObject.viewText().strip())
+                                                xml = collapseWhitespace(modelObject.viewText())
                                                 footnotes["Footnote {}".format(i+1)] = xml #re.sub(r'\s+', ' ', collapseWhitespace(modelObject.stringValue))
                                             elif isinstance(modelObject, ModelFact):
                                                 footnotes["Footnoted fact {}".format(i+1)] = \

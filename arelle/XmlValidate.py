@@ -44,7 +44,6 @@ ModelInlineValueObject: Type[Any] | None = None
 ixMsgCode: Callable[..., str] | None = None
 
 normalizeWhitespacePattern = re_compile(r"[\t\n\r]") # replace tab, line feed, return with space (XML Schema Rules, note: does not include NBSP)
-collapseWhitespacePattern = re_compile(r"[ \t\n\r]+") # collapse multiple spaces, tabs, line feeds and returns to single space
 entirelyWhitespacePattern = re_compile(r"^[ \t\n\r]+$") # collapse multiple spaces, tabs, line feeds and returns to single space
 languagePattern = re_compile("[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$")
 NCNamePattern = re_compile("^[_A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF\u0100-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF]"
@@ -401,7 +400,7 @@ def validateValue(
             if whitespaceReplace:
                 value = normalizeWhitespacePattern.sub(' ', value) # replace tab, line feed, return with space
             elif whitespaceCollapse:
-                value = ' '.join(value.split())
+                value = XmlUtil.collapseWhitespace(value)
             if baseXsdType == "noContent":
                 if len(value) > 0 and not entirelyWhitespacePattern.match(value): # only xml schema pattern whitespaces removed
                     raise ValueError("value content not permitted")

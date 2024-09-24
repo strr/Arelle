@@ -35,7 +35,7 @@ xmlDeclarationPattern = re.compile(r"(\s+)?(<\?xml[^><\?]*\?>)", re.DOTALL)
 xmlEncodingPattern = re.compile(r"\s*<\?xml\s.*encoding=['\"]([^'\"]*)['\"].*\?>")
 xpointerFragmentIdentifierPattern = re.compile(r"([\w.]+)(\(([^)]*)\))?")
 xmlnsStripPattern = re.compile(r'\s*xmlns(:[\w.-]+)?="[^"]*"')
-nonSpacePattern = re.compile(r"\S+")
+
 
 class XmlDeclarationLocationException(Exception):
     def __init__(self) -> None:
@@ -305,7 +305,7 @@ def escapedText(text: str) -> str:
                    for c in text)
 
 def collapseWhitespace(s: str) -> str:
-    return ' '.join( nonSpacePattern.findall(s) )
+    return ' '.join(s.split())
 
 def parentId(
     element: ModelObject,
