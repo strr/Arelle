@@ -193,10 +193,17 @@ def string_length(xc, p, contextItem, args):
     if len(args) > 1: raise XPathContext.FunctionNumArgs()
     return len( stringArg(xc, args, 0, "xs:string", missingArgFallback=contextItem) )
 
-nonSpacePattern = re.compile(r"\S+")
+
 def normalize_space(xc, p, contextItem, args):
-    if len(args) > 1: raise XPathContext.FunctionNumArgs()
-    return ' '.join( nonSpacePattern.findall( stringArg(xc, args, 0, "xs:string", missingArgFallback=contextItem) ) )
+    if 0 == len(args):
+        input = string(xc, p, contextItem, args)
+    elif 1 == len(args):
+        input = stringArg(xc, args, 0, "xs:string", missingArgFallback=contextItem)
+    else:
+        raise XPathContext.FunctionNumArgs()
+
+    return XmlUtil.collapseWhitespace(input)
+
 
 def normalize_unicode(xc, p, contextItem, args):
     raise fnFunctionNotAvailable()

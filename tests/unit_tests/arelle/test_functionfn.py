@@ -1,8 +1,9 @@
 import pytest
 import regex
 
-from arelle.FunctionFn import tokenize
+from arelle.FunctionFn import normalize_space, tokenize
 from arelle.formula import XPathContext
+from arelle import FunctionFn
 
 # See https://www.w3.org/TR/xpath-functions/#func-tokenize for test sources:
 TOKENIZE_TESTS = [
@@ -39,6 +40,12 @@ TOKENIZE_TESTS = [
     (("a", ".", "p"), None, "[err:FORX0001]"),
     # Pattern not found in input, return input string as singleton
     (("asdf", "99", ""), ("asdf",), None),
+    # Multi line
+    (("\n\nwibble\n\n", ","), ("\n\nwibble\n\n",), None),
+    (("\n\nwibble,wobble\n\n", ","), ("\n\nwibble", "wobble\n\n",), None),
+    (("\n\nwibble\n\n",), ("wibble",), None),
+    (("\n\nwibble \t \t wobble\n\n",), ("wibble", "wobble",), None),
+    (("\n\nwibble \t , \t wobble\n\n", r"[\t\n ,]+"), ("", "wibble", "wobble", ""), None),
 ]
 
 
@@ -53,3 +60,36 @@ def test_tokenize(args, expected, raises):
     else:
         with pytest.raises(XPathContext.XPathException, match=regex.escape(raises)):
             result = tokenize(xc, p, contextItem, args)
+
+
+# See https://www.w3.org/TR/xpath-functions-31/#func-normalize-space for test sources
+NORMALIZE_SPACE_TESTS = [
+    (("",), "", None, None),
+    (((),), "", None, None),
+    ((" The    wealthy curled darlings                                         of    our    nation. ",), "The wealthy curled darlings of our nation.", None, None),
+    ((), "asdf xyzzy rhubarb", None, "asdf  xyzzy  rhubarb"),
+    (("\0\r\n\0\t\0 \0",), "\0 \0 \0 \0", None, None),
+    (("\r\n",), "", None, None),
+    ((" \tasdf xyzzy\n   \n \n",), "asdf xyzzy", None, None)
+]
+
+@pytest.mark.parametrize("args,expected,raises,context", NORMALIZE_SPACE_TESTS)
+def test_normalize_space(args, expected, raises, context, monkeypatch):
+    xc = None
+    p = None
+    contextItem = None
+
+    def fake_string(xc, p, contextItem, args):
+        return context
+
+    # the zero argument variant of normalize() calls fn:string() on the context
+    # so fake up string() to always return the context specified in the test
+    # data
+    monkeypatch.setattr(FunctionFn, "string", fake_string)
+
+    if raises is None:
+        result = normalize_space(xc, p, contextItem, args)
+        assert result == expected
+    else:
+        with pytest.raises(XPathContext.XPathException, match=regex.escape(raises)):
+            result = normalize_space(xc, p, contextItem, args)
