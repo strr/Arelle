@@ -81,6 +81,7 @@ class Session:
         responseZipStream: BinaryIO | None = None,
         logHandler: logging.Handler | None = None,
         logFilters: list[logging.Filter] | None = None,
+        sourceZipStreamFileName: str | None = None, 
     ) -> bool:
         """
         Perform a run using the given options.
@@ -88,6 +89,7 @@ class Session:
         :param sourceZipStream: Optional stream to read source data from.
         :param responseZipStream: Options stream to write response data to.
         :param logHandler: Optional log handler to use for logging.
+        :param sourceZipStreamFileName: Optional filename for the sourceZipStream. Useful for making sure report package file extension validation works.
         :return: True if the run was successful, False otherwise.
         """
         PackageManager.reset()
@@ -143,4 +145,5 @@ class Session:
                 options,
                 sourceZipStream=sourceZipStream,
                 responseZipStream=responseZipStream,
+                sourceZipStreamFileName=sourceZipStreamFileName,
             )
