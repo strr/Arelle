@@ -41,7 +41,7 @@ def get_document_id(doc: ModelDocument) -> str:
             checked_paths.add(basefile)
     # Try referenced documents
     ref_file_source = next(iter(file_source.referencedFileSources.values()), None)
-    ref_basefile: str | None = ref_file_source.basefile if ref_file_source is not None else None
+    ref_basefile: str | None = ref_file_source.basefile if ref_file_source is not None else None  # type: ignore[assignment]
     if ref_basefile is not None:
         ref_basefile = PurePath(ref_basefile).as_posix()
         if ref_basefile in parents:
@@ -54,7 +54,7 @@ def get_document_id(doc: ModelDocument) -> str:
         archive_path_part = PurePath(archive_path_parts[1]).as_posix()
         return archive_path_part
     # Use file source URL as fallback if basepath not found
-    file_source_url = PurePath(os.path.dirname(file_source.url)).as_posix()
+    file_source_url = PurePath(os.path.dirname(file_source.url)).as_posix()  # type: ignore[arg-type,type-var]
     if file_source_url in parents:
         return get_document_id_from_basepath(doc, file_source_url)
     else:
@@ -99,18 +99,18 @@ def get_test_data(
         test_cases_with_no_variations = set()
         test_cases_with_unrecognized_type = {}
         skipped_test_cases = set()
-        model_document = cntlr.modelManager.modelXbrl.modelDocument
+        model_document = cntlr.modelManager.modelXbrl.modelDocument  # type: ignore[union-attr]
         test_cases: list[ModelDocument] = []
-        if strict_testcase_index and model_document.type == ModelDocumentType.TESTCASESINDEX:
-            model_errors = sorted(cntlr.modelManager.modelXbrl.errors)
-            assert 'IOerror' not in model_errors, f'One or more testcases referenced by testcases index "{model_document.filepath}" were not found.'
+        if strict_testcase_index and model_document.type == ModelDocumentType.TESTCASESINDEX:  # type: ignore[union-attr]
+            model_errors = sorted(cntlr.modelManager.modelXbrl.errors)  # type: ignore[union-attr]
+            assert 'IOerror' not in model_errors, f'One or more testcases referenced by testcases index "{model_document.filepath}" were not found.'  # type: ignore[union-attr]
         collect_test_data(
             cntlr=cntlr,
             expected_failure_ids=expected_failure_ids,
             required_locale_by_ids=required_locale_by_ids,
             system_locale=system_locale,
             results=results,
-            model_document=model_document,
+            model_document=model_document,  # type: ignore[arg-type]
             test_cases=test_cases,
         )
         for test_case in sorted(test_cases, key=lambda doc: doc.uri):
