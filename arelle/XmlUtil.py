@@ -144,28 +144,21 @@ def prefixedNameToClarkNotation(element: ModelObject, prefixedName: str) -> str 
     return "{{{0}}}{1}".format(ns, localname)
 
 def encoding(xml: str | bytes, default: str = "utf-8") -> str:
-    if isinstance(xml,bytes):
-        s = xml[0:120]
-        if s.startswith(b'\xef\xbb\xbf'):
+    if isinstance(xml, bytes):
+        head = xml[:120]
+        if head.startswith(b'\xef\xbb\xbf'):
             return 'utf-8-sig'
-        if s.startswith(b'\xff\xfe'):
-            return 'utf-16'
-        if s.startswith(b'\xfe\xff'):
-            return 'utf-16'
-        if s.startswith(b'\xff\xfe\x00\x00'):
+        # UTF-32 must be checked before UTF-16 — the UTF-32 LE BOM starts with the UTF-16 LE BOM
+        if head.startswith((b'\xff\xfe\x00\x00', b'\x00\x00\xfe\xff')):
             return 'utf-32'
-        if s.startswith(b'\x00\x00\xfe\xff'):
-            return 'utf-32'
-        if s.startswith(b'# -*- coding: utf-8 -*-'):
-            return 'utf-8'  # python utf=encoded
-        if b"x\0m\0l" in s:
-            str = s.decode("utf-16")
-        else:
-            str = s.decode("latin-1")
+        if head.startswith((b'\xff\xfe', b'\xfe\xff')):
+            return 'utf-16'
+        if head.startswith(b'# -*- coding: utf-8 -*-'):
+            return 'utf-8'  # python utf-encoded
+        xmlstr = head.decode("utf-16" if b"x\0m\0l" in head else "latin-1")
     else:
-        str = xml[0:80]
-    match = xmlEncodingPattern.match(str)
-    if match and match.lastindex == 1:
+        xmlstr = xml[:80]
+    if match := xmlEncodingPattern.match(xmlstr):
         return match.group(1)
     return default
 
