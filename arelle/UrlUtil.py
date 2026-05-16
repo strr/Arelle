@@ -376,7 +376,7 @@ def isAbsolute(url: str) -> bool:
     return False
 
 def isHttpUrl(url: str) -> bool:
-    return isinstance(url,str) and (url.startswith("http://") or url.startswith("https://"))
+    return url.startswith(("http://", "https://"))
 
 def ensureUrl(maybeUrl: str) -> str:
     if isAbsolute(maybeUrl) or isHttpUrl(maybeUrl):
