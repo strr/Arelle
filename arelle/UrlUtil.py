@@ -60,12 +60,13 @@ def splitDecodeFragment(url: str) -> tuple[str, str]:
     urlPart, fragPart = url.split('#', 1) if '#' in url else (url, '')
     return (urlPart, unquote(fragPart, "utf-8"))
 
+_UNSAFE_URI_RE = re.compile(r'[ <>"{}|\\^~`\x00-\x1f]|[^\x00-\x7e]')
+_PSVI_SAFE_CHARS = "/_.-%#!~*'();?:@&=+$,"
+
 def anyUriQuoteForPSVI(uri: str) -> str:
     # only quote if quotable character found
-    if any(c in {' ', '<', '>', '"', '{', '}', '|', '\\', '^', '~', '`'} or
-           not '\x1f' < c < '\x7f'
-           for c in uri):
-        return quote(uri, safe="/_.-%#!~*'();?:@&=+$,")
+    if _UNSAFE_URI_RE.search(uri):
+        return quote(uri, safe=_PSVI_SAFE_CHARS)
     return uri
 
 def isValidAbsolute(url: str) -> bool:
